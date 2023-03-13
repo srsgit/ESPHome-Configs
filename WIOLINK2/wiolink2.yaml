@@ -85,11 +85,11 @@ light:
           update_interval: 2s
           lambda: |-
 
-            #define grid_colour    Color(120,0,0)
-            #define solar_colour   Color(0,130,0)
-            #define export_colour  Color(0,0,180)
-            #define marker_colour  Color(35,35,35)
-            #define lighten_by     120
+            #define grid_colour    Color(120,0,0)   // Red
+            #define solar_colour   Color(0,130,0)   // Green
+            #define export_colour  Color(0,0,180)   // Blue
+            #define marker_colour  Color(30,30,30)  // pale white
+            #define lighten_by     120              // lighten marker LED
             
             if (initial_run == true) {
               id(solar_power).state = 0;
