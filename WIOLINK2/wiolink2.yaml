@@ -5,10 +5,12 @@ esphome:
     light.turn_on:
       id: powerlights2
       effect: "Gauge"
-      brightness: 35%
+      brightness: 30%
+
 esp8266:
   board: wio_link
 
+# Define an Output that turns on the Grove Power on the WioLink
 output:
   - platform: gpio
     id: SENSORS_ON
@@ -18,7 +20,6 @@ output:
 
 # Enable logging
 logger:
-  level: INFO
 
 # Enable Home Assistant API
 api:
@@ -39,6 +40,8 @@ wifi:
 
 captive_portal:
 
+# Solar and Grid sensors from HA
+# Scaled to number of LED in strip
 sensor:
   - platform: homeassistant
     id: grid_power
@@ -83,9 +86,10 @@ light:
           lambda: |-
 
             #define grid_colour    Color(120,0,0)
-            #define solar_colour   Color(0,160,0)
-            #define export_colour  Color(0,0,160)
-            #define marker_colour  Color(75,75,75)
+            #define solar_colour   Color(0,130,0)
+            #define export_colour  Color(0,0,180)
+            #define marker_colour  Color(35,35,35)
+            #define lighten_by     120
             
             if (initial_run == true) {
               id(solar_power).state = 0;
@@ -96,6 +100,7 @@ light:
             it.all() = Color::BLACK;
 
             // Marker every 10 equiv to 1000W bands
+            // LED string index starts at ZERO and [0] represents 100W
             for (int i = 9; i < 40; i += 10) {
               it[i] = marker_colour;
             }
@@ -115,6 +120,6 @@ light:
             }
             // Redo Marker every 10 equiv to 1000W bands
             for (int i = 9; i < 40; i += 10) {
-              it[i].lighten(160);
+              it[i].lighten(lighten_by);
             }
     
