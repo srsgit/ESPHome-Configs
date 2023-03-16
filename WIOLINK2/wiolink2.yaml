@@ -51,8 +51,8 @@ sensor:
       - calibrate_linear:
           # Map 4000 (from sensor) to 40 (neopixel scale)
           - -4000.0 -> -40
-          - 0.0 -> 0.0
-          - 4000 -> 40
+          -     0.0 ->  0.0
+          -  5200.0 ->  52
   - platform: homeassistant
     id: solar_power
     entity_id: sensor.solaredge_ac_power
@@ -71,7 +71,7 @@ light:
     pin: GPIO14
 
     # Length of chosen led string
-    num_leds: 40
+    num_leds: 52
     name: "Powerlights2"
     id: powerlights2
 
@@ -101,7 +101,8 @@ light:
 
             // Marker every 10 equiv to 1000W bands
             // LED string index starts at ZERO and [0] represents 100W
-            for (int i = 9; i < 40; i += 10) {
+
+            for (int i = 9; i < 52; i += 10) {
               it[i] = marker_colour;
             }
 
@@ -119,7 +120,7 @@ light:
               it.range(0, id(solar_power).state + id(grid_power).state) = solar_colour; 
             }
             // Redo Marker every 10 equiv to 1000W bands
-            for (int i = 9; i < 40; i += 10) {
+            for (int i = 9; i < 52; i += 10) {
               it[i].lighten(lighten_by);
             }
     
