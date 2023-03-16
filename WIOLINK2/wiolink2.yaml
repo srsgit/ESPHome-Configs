@@ -101,6 +101,7 @@ light:
 
             // Marker every 10 equiv to 1000W bands
             // LED string index starts at ZERO and [0] represents 100W
+
             for (int i = 9; i < 52; i += 10) {
               it[i] = marker_colour;
             }
