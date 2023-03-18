@@ -38,33 +38,17 @@ sensor:
     filters:
       multiply: -1.0
     internal: true
+    on_value:
+      then:
+        component.update: t4_display
 
   - platform: homeassistant
     id: solar_power
     entity_id: sensor.solaredge_ac_power
     internal: true
-
-  - platform: homeassistant
-    id: grid_power_leds
-    entity_id: sensor.solaredge_m1_ac_power
-    filters:
-      - multiply: -1.0
-      - calibrate_linear:
-          # Map 4000 (from sensor) to 40 (neopixel scale)
-          - -4000.0 -> -40
-          -     0.0 ->  0.0
-          -  5200.0 ->  52
-    internal: true
-
-  - platform: homeassistant
-    id: solar_power_leds
-    entity_id: sensor.solaredge_ac_power
-    internal: true
-    filters:
-      - calibrate_linear:
-          # Map 4000 (from sensor) to 40 (neopixel scale)
-          - 0.0 -> 0.0
-          - 4000 -> 40
+    on_value:
+      then:
+        component.update: t4_display
 
 font:
   - file: "fonts/Google_Sans_Medium.ttf"
