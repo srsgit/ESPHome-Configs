@@ -35,7 +35,9 @@ spi:
 sensor:
   - platform: homeassistant
     id: grid_power
-    entity_id: sensor.smart_meter_electricity_power
+    entity_id: sensor.solaredge_m1_ac_power
+    filters:
+      multiply: -1.0
     internal: true
   - platform: homeassistant
     id: solar_power
