@@ -39,15 +39,56 @@ sensor:
     filters:
       multiply: -1.0
     internal: true
+    on_value:
+      then:
+        component.update: t4_display
+
   - platform: homeassistant
     id: solar_power
     entity_id: sensor.solaredge_ac_power
+    internal: true
+    on_value:
+      then:
+        component.update: t4_display
+
+  - platform: homeassistant
+    id: battery_charge
+    state_class: measurement
+    unit_of_measurement: "kWh"
+    entity_id: sensor.battery_sim_13_5_kwh_battery
+    internal: true
+
+text_sensor:
+  - platform: homeassistant
+    name: "Battery Mode"
+    id: battery_mode
+    entity_id: sensor.battery_sim_13_5_kwh_battery_battery_mode_now
+    internal: true
+
+  - platform: homeassistant
+    name: "Home Phone"
+    id: home_phone
+    entity_id: sensor.fritz_box_7490_call_monitor_google
+    internal: true
+    on_value:
+      then:
+        component.update: t4_display
+
+  - platform: homeassistant
+    name: "Home Phone Number"
+    id: home_phone_number
+    entity_id: sensor.fritz_box_7490_call_monitor_google
+    attribute: from_name
     internal: true
 
 font:
   - file: "fonts/Google_Sans_Medium.ttf"
     id: my_font
-    size: 56   
+    size: 48
+
+  - file: "fonts/Google_Sans_Medium.ttf"
+    id: my_small_font
+    size: 28
 
 display:
   platform: ili9xxx
@@ -57,36 +98,56 @@ display:
   dc_pin: 26
   reset_pin: 5
   rotation: 90
-  update_interval: 2s
+  update_interval: 5s
   lambda: |-
-    it.fill(Color::BLACK);
-
+    #define xres      320 
+    #define yres      240
     #define x1_col    0
-    #define x2_col    320
-    #define y_spacing 80
+    #define x2_col    (xres)
+    #define y_spacing 60
 
-    #define GRID_COLOUR   Color(255,0,0)
-    #define SOLAR_COLOUR  Color(0,255,0)
-    #define IMPORT_COLOUR Color(255,0,0)
-    #define EXPORT_COLOUR Color(255,255,255)
+    #define RED_COLOUR     Color(255,0,0)
+    #define GRID_COLOUR    Color(255,0,0)
+    #define SOLAR_COLOUR   Color(0,255,0)
+    #define IMPORT_COLOUR  Color(255,0,0)
+    #define EXPORT_COLOUR  Color(255,255,255)
+    #define BATTERY_COLOUR Color(255,255,255)
 
     int y = 0;
 
-    if (id(grid_power).state >= 0) {
-      it.print(x1_col, y, id(my_font), GRID_COLOUR, TextAlign::TOP_LEFT, "Grid");
-      it.printf(x2_col, y, id(my_font), GRID_COLOUR, TextAlign::TOP_RIGHT, "%5.0f", id(grid_power).state);
-    } else {
-      it.print(x1_col, y, id(my_font), EXPORT_COLOUR, TextAlign::TOP_LEFT, "Export");
-      it.printf(x2_col, y, id(my_font), EXPORT_COLOUR, TextAlign::TOP_RIGHT, "%5.0f", -id(grid_power).state);
-    }
+    if (id(home_phone).state == "ringing") {
 
-    y += y_spacing;
-    it.print(x1_col, y, id(my_font), SOLAR_COLOUR, TextAlign::TOP_LEFT, "Solar ");
-    it.printf(x2_col, y, id(my_font), SOLAR_COLOUR, TextAlign::TOP_RIGHT, "%5.0f", id(solar_power).state);
+      it.fill(RED_COLOUR);
+      it.printf(xres/2, yres/2-24, id(my_font), Color::WHITE, TextAlign::TOP_CENTER, " %s", id(home_phone_number).state.c_str());
+
+    } else {
+
+      it.fill(Color::BLACK);
+      if (id(grid_power).state >= 0) {
+        it.print(x1_col, y, id(my_font), GRID_COLOUR, TextAlign::TOP_LEFT, "Grid");
+        it.printf(x2_col, y, id(my_font), GRID_COLOUR, TextAlign::TOP_RIGHT, "%5.0f", id(grid_power).state);
+      } else {
+        it.print(x1_col, y, id(my_font), EXPORT_COLOUR, TextAlign::TOP_LEFT, "Export");
+        it.printf(x2_col, y, id(my_font), EXPORT_COLOUR, TextAlign::TOP_RIGHT, "%5.0f", -id(grid_power).state);
+      }
+
+      y += y_spacing;
+      it.print(x1_col, y, id(my_font), SOLAR_COLOUR, TextAlign::TOP_LEFT, "Solar ");
+      it.printf(x2_col, y, id(my_font), SOLAR_COLOUR, TextAlign::TOP_RIGHT, "%5.0f", id(solar_power).state);
     
-    y += y_spacing;
-    Color house_colour = (id(grid_power).state > 0) ? IMPORT_COLOUR : SOLAR_COLOUR;
-    float consumption = id(grid_power).state + id(solar_power).state;
-    it.print(x1_col, y, id(my_font), house_colour, TextAlign::TOP_LEFT, "House ");
-    it.printf(x2_col, y, id(my_font), house_colour, TextAlign::TOP_RIGHT, "%5.0f", consumption);
-    
+      y += y_spacing;
+      Color house_colour = (id(grid_power).state > 0) ? IMPORT_COLOUR : SOLAR_COLOUR;
+      float consumption = id(grid_power).state + id(solar_power).state;
+      it.print(x1_col, y, id(my_font), house_colour, TextAlign::TOP_LEFT, "House ");
+      it.printf(x2_col, y, id(my_font), house_colour, TextAlign::TOP_RIGHT, "%5.0f", consumption);
+
+      y += y_spacing + 20;
+
+      //Divider
+      #define div_pad 4
+      #define div_thickness 2
+      it.filled_rectangle(0, y-div_pad, xres, div_thickness);
+
+      it.printf(x1_col, y, id(my_small_font), BATTERY_COLOUR, TextAlign::TOP_LEFT, "%02s", id(battery_mode).state.c_str());
+      it.printf(x2_col, y, id(my_small_font), BATTERY_COLOUR, TextAlign::TOP_RIGHT, "%2.1f", id(battery_charge).state);
+    }
